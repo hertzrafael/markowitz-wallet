@@ -3,6 +3,9 @@ import streamlit as st
 class Layout:
 
     def __init__(self):
+        if "assets" not in st.session_state:
+            st.session_state["assets"] = []
+        
         self.run()
 
     def run(self):
@@ -18,12 +21,16 @@ class Layout:
             'Ativo:',
             placeholder='Insira aqui o ativo a ser adicionado...'
         )
+        
+        if st.sidebar.button('Adicionar ativo', type='primary') and asset:
+            st.session_state["assets"].append(asset.upper())
 
         st.sidebar.divider()
 
         selected_assets = st.sidebar.multiselect(
             'Ativos adicionados:',
-            options=[]
+            default=st.session_state["assets"],
+            options=st.session_state["assets"]
         )
 
-        print(objective)
+        print(st.session_state["assets"])
