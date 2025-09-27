@@ -58,7 +58,7 @@ class Layout:
         file_name = st.text_input('Insira o nome do arquivo a ser criado:')
 
         if st.button('Baixar retorno dos ativos'):
-            assets = Assets(tickers=st.session_state["assets"])
+            assets = Assets(tickers=selected_assets)
             download = assets.download(
                 '2025-01-01', 
                 to_datetime('today').strftime('%Y-%m-%d'), 
