@@ -53,12 +53,39 @@ class Layout:
     def __tab_results__(self, objective, file_name):
         folder = os.path.join(os.getcwd(), self.config.tmp_name)
         file = read_csv(os.path.join(folder, f'{file_name}'), index_col=0, parse_dates=True)
+        markowitz = Markowitz(file)
 
-        st.dataframe(file, hide_index=True, width="stretch")
+        with st.expander('Informações'):
+            st.write(f'''
+                Você está selecionando o objetivo '{objective}' dos ativos:
 
-        Markowitz(file).minimize_risk()
+                {", ".join([column for column in file.columns])}.
+            ''')
 
-    
+        st.header(f'Objetivo: {objective}')
+
+        target_annual_return = st.number_input(
+            'Insira o retorno alvo anual:', 
+            min_value=0.0,
+            max_value=100.0,
+            step=0.01,
+            format="%.2f"
+        )
+
+        optimize_markowitz = markowitz.minimize_risk(target_annual_return)
+
+        st.subheader('Resultado:')
+
+        _, first_metric, second_metric, _ = st.columns(4)
+
+        with first_metric:
+            st.metric('Retorno final', optimize_markowitz['final_return'], border=True)
+
+        with second_metric:
+            st.metric('Risco final', optimize_markowitz['final_risk'], border=True)
+        
+        st.dataframe(optimize_markowitz['weights'])
+
     def __tab_assets__(self):
         asset = st.text_input(
             'Ativo:',
