@@ -1,31 +1,36 @@
 from source.assets import Assets
-from pandas import to_datetime
+from source.markowitz import Markowitz
+from pandas import to_datetime, read_csv
 
 import streamlit as st
 import os
 
 class Layout:
 
-    def __init__(self):
+    def __init__(self, config):
         if "assets" not in st.session_state:
             st.session_state["assets"] = []
         
+        self.config = config
         self.run()
 
     def run(self):
         st.set_page_config(page_title="Markowitz Otimização", layout="wide")
 
-        self.__make_sidebar__()
+        map = self.__make_sidebar__()
 
         tab_result, tab_assets = st.tabs([
             "RESULTADOS", 
             "ATIVOS"
         ])
 
+        with tab_result:
+            self.__tab_results__(map['objective'], map['assets'])
+
         with tab_assets:
             self.__tab_assets__()
 
-        print(st.session_state["assets"])
+        print(map['assets'])
 
     def __make_sidebar__(self):
         st.sidebar.header("Carteira")
@@ -34,11 +39,25 @@ class Layout:
             ('Minimizar risco', 'Maximizar retorno')
         )
 
-        files = [file for file in os.listdir(os.path.join(os.getcwd(), 'tmp')) if file.endswith('.csv')]
-        assets = st.sidebar.multiselect(
-            'Escolha o arquivo com os ativos para análise.',
+        files = [file for file in os.listdir(os.path.join(os.getcwd(), self.config.tmp_name)) if file.endswith('.csv')]
+        assets = st.sidebar.selectbox(
+            'Escolha o arquivo com os ativos para análise:',
             options=files
         )
+
+        return {
+            'assets': assets,
+            'objective': objective
+        }
+    
+    def __tab_results__(self, objective, file_name):
+        folder = os.path.join(os.getcwd(), self.config.tmp_name)
+        file = read_csv(os.path.join(folder, f'{file_name}'), index_col=0, parse_dates=True)
+
+        st.dataframe(file, hide_index=True, width="stretch")
+
+        Markowitz(file).minimize_risk()
+
     
     def __tab_assets__(self):
         asset = st.text_input(
@@ -63,7 +82,7 @@ class Layout:
                 '2025-01-01', 
                 to_datetime('today').strftime('%Y-%m-%d'), 
                 save=True, 
-                save_path=f'tmp/{file_name}'
+                save_path=f'{self.config.tmp_name}/{file_name}'
             )
 
             if download is not None:
