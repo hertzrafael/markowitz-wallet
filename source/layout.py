@@ -64,28 +64,12 @@ class Layout:
 
         st.header(f'Objetivo: {objective}')
 
-        target_annual_return = st.number_input(
-            'Insira o retorno alvo anual:', 
-            min_value=0.0,
-            max_value=100.0,
-            step=0.01,
-            format="%.2f"
-        )
+        if objective == 'Minimizar risco':
+            self.__result_minimize_risk__(markowitz)
+        else:
+            self.__result_maximize_profit__(markowitz)
 
-        optimize_markowitz = markowitz.minimize_risk(target_annual_return)
-
-        st.subheader('Resultado:')
-
-        _, first_metric, second_metric, _ = st.columns(4)
-
-        with first_metric:
-            st.metric('Retorno final', optimize_markowitz['final_return'], border=True)
-
-        with second_metric:
-            st.metric('Risco final', optimize_markowitz['final_risk'], border=True)
         
-        st.dataframe(optimize_markowitz['weights'])
-
     def __tab_assets__(self):
         asset = st.text_input(
             'Ativo:',
@@ -114,3 +98,54 @@ class Layout:
 
             if download is not None:
                 st.sidebar.success('O arquivo foi baixado com sucesso.')
+    
+    def __result_minimize_risk__(self, markowitz):
+        target_annual_return = st.number_input(
+            'Insira o retorno alvo anual:', 
+            min_value=0.0,
+            max_value=100.0,
+            step=0.01,
+            format="%.2f"
+        )
+
+        optimize_markowitz = markowitz.minimize_risk(target_annual_return)
+        st.subheader('Resultado:')
+
+        _, first_metric, second_metric, _ = st.columns(4)
+
+        with first_metric:
+            st.metric('Retorno final', optimize_markowitz['final_return'], border=True)
+
+        with second_metric:
+            st.metric('Risco final', optimize_markowitz['final_risk'], border=True)
+        
+        st.dataframe(optimize_markowitz['weights'])
+
+    def __result_maximize_profit__(self, markowitz):
+        st.subheader('Resultado:')
+
+        cap = st.number_input(
+            'Insira o CAP:', 
+            min_value=0.0,
+            max_value=100.0,
+            step=0.01,
+            format="%.2f"
+        )
+
+        with st.expander('O que é CAP?'):
+            st.write('''
+                    CAP é a alocação (porcentagem) máxima que cada ativo poderá ter. Ou seja, quanto menor, mais diversificada a
+                    carteira deve ser.
+            ''')
+
+        optimize_markowitz = markowitz.maximize_profit(cap)
+
+        #_, first_metric, second_metric, _ = st.columns(4)
+
+        #with first_metric:
+        #    st.metric('Retorno final', optimize_markowitz['final_return'], border=True)
+
+        #with second_metric:
+        #    st.metric('Risco final', optimize_markowitz['final_risk'], border=True)
+        
+        st.dataframe(optimize_markowitz['weights'])
