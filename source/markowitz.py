@@ -132,7 +132,7 @@ class Markowitz:
 
         return {
             'weights': w.sort_values(ascending=False),
-            'annual_return': ret_anu,
-            'final_wallet_risk': vol_anu,
-            'target_risk': sigma_alvo
+            'annual_return': np.round(ret_anu, 2),
+            'final_wallet_risk': np.round(vol_anu, 2),
+            'target_risk': np.round(sigma_alvo, 2)
         }

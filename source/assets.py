@@ -7,6 +7,13 @@ class Assets:
     def __init__(self, tickers):
         self.tickers = tickers
 
+    def check_exists(self):
+        ticker = yf.Ticker('TSLA').history(period='1mo')
+        return ticker
+
+        #for ticker in self.tickers:
+            
+
     def download(self, start, end, save=True, save_path=None):
         print(f'Iniciando download de {self.tickers}...')
         
@@ -41,6 +48,3 @@ class Assets:
             assets = None
 
         return assets
-    
-    
-        

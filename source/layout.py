@@ -51,6 +51,11 @@ class Layout:
         }
     
     def __tab_results__(self, objective, file_name):
+
+        if file_name is None:
+            st.error('Selecione um arquivo válido para obter os resultados.')
+            return
+
         folder = os.path.join(os.getcwd(), self.config.tmp_name)
         file = read_csv(os.path.join(folder, f'{file_name}'), index_col=0, parse_dates=True)
         markowitz = Markowitz(file)
@@ -140,12 +145,15 @@ class Layout:
 
         optimize_markowitz = markowitz.maximize_profit(cap)
 
-        #_, first_metric, second_metric, _ = st.columns(4)
+        _, first_metric, second_metric, third_metric, _ = st.columns(5)
 
-        #with first_metric:
-        #    st.metric('Retorno final', optimize_markowitz['final_return'], border=True)
+        with first_metric:
+            st.metric('Retorno anual', optimize_markowitz['annual_return'], border=True)
 
-        #with second_metric:
-        #    st.metric('Risco final', optimize_markowitz['final_risk'], border=True)
+        with second_metric:
+            st.metric('Risco final', optimize_markowitz['final_wallet_risk'], border=True)
+
+        with third_metric:
+            st.metric('Risco alvo', optimize_markowitz['target_risk'], border=True)
         
         st.dataframe(optimize_markowitz['weights'])
